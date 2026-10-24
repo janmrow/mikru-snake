@@ -1,6 +1,6 @@
 # Roadmap
 
-## Now — M1: playable core
+## Complete — M1: playable core
 
 Implemented:
 
@@ -8,13 +8,9 @@ Implemented:
 - food, growth, wall and self-collision, and ignored opposite-direction input
 - food spawning on free cells and completion when the board is full
 - focused core tests
-
-Still needed to complete M1:
-
-- the game runs in the browser
-- keyboard controls work
-- the browser uses the core for movement, food, growth, and collisions
-- the player can restart after game over
+- browser rendering and keyboard controls
+- a fixed-interval loop using the core for movement, food, growth, and collisions
+- stopping on game over and restarting with a fresh board
 
 ## Next — M2: browser polish
 
