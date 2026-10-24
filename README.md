@@ -4,7 +4,7 @@ A tiny browser Snake game built with vanilla JavaScript, native web APIs, and fo
 
 The goal is simple: make a small, fun game while learning modern web engineering without unnecessary tooling.
 
-Implementation has not started yet.
+The browser scaffold is in place. Game functionality is not implemented yet.
 
 ## Principles
 
@@ -21,13 +21,13 @@ Planned approach: keep game logic separate from browser code. Pass randomness in
 
 ## Development
 
-Planned test command:
+Run the test command (there are no tests yet):
 
 ```bash
-node --test
+npm test
 ```
 
-No build step is required.
+Serve this directory over HTTP and open `index.html` in a browser. No build step is required.
 
 ## Direction
 
