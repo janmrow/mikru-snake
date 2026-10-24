@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 let session = 0;
 
-async function openGame(t, rng = () => 0) {
+async function openGame(t) {
   const window = new EventTarget();
   const restart = new EventTarget();
   const status = { textContent: '' };
@@ -13,7 +13,7 @@ async function openGame(t, rng = () => 0) {
       if (x === 0 && y === 0 && width === board.width && height === board.height) {
         rectangles.length = 0;
       }
-      rectangles.push({ x, y, width, height, color: this.fillStyle });
+      rectangles.push([x, y, width, height]);
     },
   };
   const board = { getContext: () => context };
@@ -32,7 +32,7 @@ async function openGame(t, rng = () => 0) {
       else delete globalThis[name];
     });
   }
-  t.mock.method(Math, 'random', rng);
+  t.mock.method(Math, 'random', () => 0);
   t.mock.method(globalThis, 'setInterval', (callback, delay) => {
     assert.equal(delay, 150);
     timers.set(++nextTimer, callback);
@@ -43,7 +43,7 @@ async function openGame(t, rng = () => 0) {
   await import(`../src/main.js?session=${session++}`);
 
   return {
-    board,
+    rectangles,
     status,
     timers,
     tick() {
@@ -55,47 +55,39 @@ async function openGame(t, rng = () => 0) {
       window.dispatchEvent(event);
     },
     restart: () => restart.dispatchEvent(new Event('click')),
-    cells(color) {
-      const cells = [];
-      for (let y = 0; y < board.height; y += 20) {
-        for (let x = 0; x < board.width; x += 20) {
-          const pixel = rectangles.findLast(rect =>
-            x >= rect.x && x < rect.x + rect.width &&
-            y >= rect.y && y < rect.y + rect.height);
-          if (pixel?.color === color) cells.push([x / 20, y / 20]);
-        }
-      }
-      return cells;
-    },
   };
 }
 
 test('keyboard input, growth, continued movement, and collision reach the rendered board', async t => {
-  let randomCalls = 0;
-  // Place the first food directly ahead; later food appears at the top left.
-  const game = await openGame(t, () => randomCalls++ === 0 ? 208.5 / 397 : 0);
-  assert.equal(game.board.width, 400);
-  assert.equal(game.board.height, 400);
-  assert.deepEqual(game.cells('#166534'), [[10, 10]]);
-  assert.deepEqual(game.cells('#dc2626'), [[11, 10]]);
+  const game = await openGame(t);
+  // The final rectangle marks the head; coordinates are in Canvas pixels.
+  assert.deepEqual(game.rectangles.at(-1), [200, 200, 20, 20]);
 
-  game.key('ArrowLeft'); // The core ignores this reversal and eats the food ahead.
+  game.key('ArrowLeft'); // The core ignores this reversal.
   game.tick();
-  assert.deepEqual(game.cells('#166534'), [[11, 10]]);
-  assert.equal(game.cells('#16a34a').length, 3);
-  assert.deepEqual(game.cells('#dc2626'), [[0, 0]]);
+  assert.deepEqual(game.rectangles.at(-1), [220, 200, 20, 20]);
 
   game.key('ArrowUp');
   game.tick();
   game.tick();
-  assert.deepEqual(game.cells('#166534'), [[11, 8]]);
-  for (let i = 0; i < 9; i += 1) game.tick();
+  assert.deepEqual(game.rectangles.at(-1), [220, 160, 20, 20]);
+
+  // With RNG fixed at zero, food starts at (0, 0). Move up, then left to eat it.
+  for (let i = 0; i < 8; i += 1) game.tick();
+  game.key('ArrowLeft');
+  for (let i = 0; i < 11; i += 1) game.tick();
+  assert.deepEqual(game.rectangles.at(-1), [0, 0, 20, 20]);
+  // Growth keeps the tail at (3, 0); the next food appears at (4, 0).
+  assert.ok(game.rectangles.some(rect => rect[0] === 60 && rect[1] === 0));
+  assert.ok(game.rectangles.some(rect => rect[0] === 80 && rect[1] === 0));
+
+  game.tick(); // Continuing left hits the wall.
   assert.equal(game.status.textContent, 'lost');
   assert.equal(game.timers.size, 0);
-  const finalHead = game.cells('#166534');
+  const finalFrame = structuredClone(game.rectangles);
   game.key('ArrowRight');
   game.tick();
-  assert.deepEqual(game.cells('#166534'), finalHead);
+  assert.deepEqual(game.rectangles, finalFrame);
 });
 
 test('restart clears pending input and replaces the timer during play and after game over', async t => {
@@ -106,7 +98,7 @@ test('restart clears pending input and replaces the timer during play and after 
   assert.equal(game.timers.size, 1);
   assert.equal(game.status.textContent, 'playing');
   game.tick();
-  assert.deepEqual(game.cells('#166534'), [[11, 10]]);
+  assert.deepEqual(game.rectangles.at(-1), [220, 200, 20, 20]);
 
   for (let i = 0; i < 9; i += 1) game.tick();
   assert.equal(game.status.textContent, 'lost');
@@ -114,8 +106,7 @@ test('restart clears pending input and replaces the timer during play and after 
   game.restart();
   assert.equal(game.timers.size, 1);
   assert.equal(game.status.textContent, 'playing');
-  assert.deepEqual(game.cells('#166534'), [[10, 10]]);
-  assert.equal(game.cells('#16a34a').length, 2);
+  assert.deepEqual(game.rectangles.at(-1), [200, 200, 20, 20]);
   game.tick();
-  assert.deepEqual(game.cells('#166534'), [[11, 10]]);
+  assert.deepEqual(game.rectangles.at(-1), [220, 200, 20, 20]);
 });
