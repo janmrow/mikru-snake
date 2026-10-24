@@ -4,7 +4,7 @@ A tiny browser Snake game built with vanilla JavaScript, native web APIs, and fo
 
 The goal is simple: make a small, fun game while learning modern web engineering without unnecessary tooling.
 
-The deterministic game core is implemented and tested. The browser still shows the title; rendering, controls, and a game loop are next.
+The deterministic game core is implemented and tested. The browser renders the initial board and shows direction commands from the arrow keys. Movement and a game loop are next.
 
 ## Principles
 
@@ -19,7 +19,9 @@ The deterministic game core is implemented and tested. The browser still shows t
 
 - `src/main.js` is the browser entry point.
 - `src/game.js` contains the game rules, independent of browser APIs.
-- `test/game.test.js` covers the core rules with Node's built-in test runner.
+- `src/render.js` draws a supplied state on Canvas without changing it.
+- `src/input.js` maps arrow keys to direction commands, leaving turn validation to the core.
+- `test/` covers the core rules and keyboard input with Node's built-in test runner.
 
 `createGame(rng)` creates a game on a fixed 20 × 20 grid. State is a plain object with `width`, `height`, `snake`, `direction`, `food`, and `status`. Positions are `{ x, y }` objects; the snake is ordered from head to tail. Coordinates start at the top left, with `x` increasing rightward and `y` downward.
 
@@ -29,13 +31,15 @@ Pass an RNG function returning a number in `[0, 1)`, such as `Math.random`. It i
 
 ## Development
 
-Run the core tests:
+Run the tests:
 
 ```bash
 npm test
 ```
 
 Serve this directory over HTTP and open `index.html` in a browser. No build step is required.
+
+The board uses green for the snake, dark green for its head, and red for food. Arrow keys update the displayed command and prevent page scrolling. This is a static preview: commands do not advance the game yet.
 
 ## Direction
 
