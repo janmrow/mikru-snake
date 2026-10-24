@@ -1,6 +1,6 @@
 # Roadmap
 
-## Now — M1: playable core
+## Complete — M1: playable core
 
 Implemented:
 
