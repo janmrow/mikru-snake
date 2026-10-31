@@ -31,10 +31,10 @@ Pass an RNG function returning a number in `[0, 1)`, such as `Math.random`. It i
 
 ## Development
 
-Run the tests:
+Run the quality gate (syntax check plus tests) — no install step, no dependencies:
 
 ```bash
-npm test
+npm run verify
 ```
 
 Serve this directory over HTTP and open `index.html` in a browser. No build step is required.

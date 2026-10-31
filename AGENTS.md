@@ -15,7 +15,7 @@ Build MikruSnake as a small, understandable browser game.
 - Test behavior and invariants, not implementation details.
 - Do not refactor unrelated code.
 - Read only the context needed for the current task.
-- After a change, run relevant tests and inspect the diff.
+- After a change, run `npm run verify` and inspect the diff.
 - Stop when the task is done.
 
 ## Just Enough

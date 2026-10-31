@@ -11,6 +11,7 @@ Implemented:
 - browser rendering and keyboard controls
 - a fixed-interval loop using the core for movement, food, growth, and collisions
 - stopping on game over and restarting with a fresh board
+- small CI workflow (`npm run verify`: syntax check plus tests)
 
 ## Next — M2: browser polish
 
@@ -30,6 +31,5 @@ Candidates, not commitments:
 - Caddy and sensible HTTP/security headers
 - offline/PWA support
 - local high score
-- small CI workflow
 
 Each item must earn its place.
