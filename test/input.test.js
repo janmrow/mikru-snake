@@ -21,17 +21,13 @@ test('arrow keys emit direction commands and prevent browser scrolling', () => {
   assert.deepEqual(commands, ['up', 'down', 'left', 'right']);
 });
 
-test('unrelated keys are untouched and input can be unbound', () => {
+test('unrelated keys are untouched', () => {
   const target = new EventTarget();
   const commands = [];
-  const unbind = bindInput(target, direction => commands.push(direction));
+  bindInput(target, direction => commands.push(direction));
 
   for (const key of ['Enter', 'a', 'constructor']) {
     assert.equal(keydown(target, key).defaultPrevented, false);
   }
-  assert.deepEqual(commands, []);
-
-  unbind();
-  assert.equal(keydown(target, 'ArrowUp').defaultPrevented, false);
   assert.deepEqual(commands, []);
 });

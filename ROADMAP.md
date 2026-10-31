@@ -1,17 +1,8 @@
 # Roadmap
 
-## Complete — M1: playable core
+## Done — M1: playable core ✓
 
-Implemented:
-
-- deterministic core movement on a fixed grid
-- food, growth, wall and self-collision, and ignored opposite-direction input
-- food spawning on free cells and completion when the board is full
-- focused core tests
-- browser rendering and keyboard controls
-- a fixed-interval loop using the core for movement, food, growth, and collisions
-- stopping on game over and restarting with a fresh board
-- small CI workflow (`npm run verify`: syntax check plus tests)
+Deterministic core, browser rendering and controls, fixed-interval loop, restart, and `npm run verify` in CI.
 
 ## Next — M2: browser polish
 

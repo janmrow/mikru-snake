@@ -6,14 +6,11 @@ const directions = new Map([
 ]);
 
 export function bindInput(target, onDirection) {
-  function onKeyDown(event) {
+  target.addEventListener('keydown', event => {
     const direction = directions.get(event.key);
     if (direction === undefined) return;
 
     event.preventDefault();
     onDirection(direction);
-  }
-
-  target.addEventListener('keydown', onKeyDown);
-  return () => target.removeEventListener('keydown', onKeyDown);
+  });
 }
