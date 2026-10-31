@@ -2,6 +2,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "check": "for f in src/*.js test/*.js; do node --check \"$f\" || exit 1; done",
+    "test": "node --test",
+    "verify": "npm run check && npm test"
   }
 }
