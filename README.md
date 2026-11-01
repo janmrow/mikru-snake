@@ -2,6 +2,8 @@
 
 Snake, under 10 KB of runtime source. No framework. No build step.
 
+Live: https://snake.mikrus.dev
+
 Small enough to understand in one sitting.
 
 ## Why
@@ -23,6 +25,10 @@ src/main.js    wires input, core, and loop
 
 Serve this directory over HTTP and open `index.html`.
 `npm run verify` checks syntax and runs tests. No install, no build.
+
+## Deploy
+
+Push/merge to `main` runs `verify`, then deploys `index.html` and `src/` to production over SSH/rsync. PRs run `verify` only.
 
 ## Principles
 

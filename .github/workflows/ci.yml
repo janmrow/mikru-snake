@@ -17,3 +17,23 @@ jobs:
         with:
           node-version: "26"
       - run: npm run verify
+
+  deploy:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.MIKRUS_SSH_KEY }}" > ~/.ssh/mikrus_key
+          chmod 600 ~/.ssh/mikrus_key
+          printf '%s\n' "${{ vars.MIKRUS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+      - run: |
+          rsync -az --delete -e "ssh -p ${{ vars.MIKRUS_PORT }} -i ~/.ssh/mikrus_key -o StrictHostKeyChecking=yes" index.html src "${{ vars.MIKRUS_USER }}@${{ vars.MIKRUS_HOST }}:${{ vars.MIKRUS_PATH }}"
