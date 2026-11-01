@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, step } from '../src/game.js';
+import { createGame, step, score } from '../src/game.js';
 
 function game(overrides = {}) {
   return {
@@ -33,6 +33,17 @@ test('initial games are deterministic and place food on free cells', () => {
     assert.equal(state.status, 'playing');
     assertFoodIsFree(state);
   }
+});
+
+test('score is zero at the start and grows by one when food is eaten', () => {
+  let state = createGame(() => 0.5);
+  assert.equal(score(state), 0);
+  state = step(state, 'right', () => 0.5);
+  assert.equal(score(state), 0);
+
+  state = { ...state, food: { x: state.snake[0].x + 1, y: state.snake[0].y } };
+  state = step(state, 'right', () => 0.5);
+  assert.equal(score(state), 1);
 });
 
 test('movement advances the head and tail without randomness or mutation', () => {

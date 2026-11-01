@@ -5,13 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MikruSnake</title>
     <link rel="icon" href="data:,">
+    <style>
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #0b0f19;
+        color: #94a3b8;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        text-align: center;
+      }
+      h1 {
+        margin: 0 0 1rem;
+        color: #e2e8f0;
+        font-size: 1.5rem;
+        letter-spacing: 0.05em;
+      }
+      canvas {
+        display: block;
+        background: #1e293b;
+        border: 2px solid #334155;
+      }
+      #hud { margin-top: 1rem; }
+      #score { color: #e2e8f0; }
+      #hint { margin: 0.5rem 0 0; }
+    </style>
     <script type="module" src="./src/main.js"></script>
   </head>
   <body>
     <h1>MikruSnake</h1>
-    <canvas id="board" role="img" aria-label="Snake board: green snake with a dark head and red food."></canvas>
-    <p>Status: <span id="status"></span></p>
-    <p>Use the arrow keys to steer.</p>
-    <button id="restart" type="button">Restart</button>
+    <canvas id="board" role="img" aria-label="Snake board: green snake with red food on a dark board."></canvas>
+    <p id="hud">Score: <span id="score">0</span></p>
+    <p id="hint">Ready · Arrow keys to start</p>
   </body>
 </html>
