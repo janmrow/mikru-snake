@@ -9,6 +9,8 @@ function sameCell(a, b) {
   return a.x === b.x && a.y === b.y;
 }
 
+const initialSnakeLength = 3;
+
 function spawnFood(width, height, snake, rng) {
   const freeCells = [];
   for (let y = 0; y < height; y += 1) {
@@ -36,6 +38,10 @@ export function createGame(rng) {
     food: spawnFood(width, height, snake, rng),
     status: 'playing',
   };
+}
+
+export function score(state) {
+  return state.snake.length - initialSnakeLength;
 }
 
 export function step(state, input, rng) {

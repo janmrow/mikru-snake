@@ -26,7 +26,7 @@ test('unrelated keys are untouched', () => {
   const commands = [];
   bindInput(target, direction => commands.push(direction));
 
-  for (const key of ['Enter', 'a', 'constructor']) {
+  for (const key of ['Enter', 'a', ' ', 'constructor']) {
     assert.equal(keydown(target, key).defaultPrevented, false);
   }
   assert.deepEqual(commands, []);
