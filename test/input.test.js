@@ -13,7 +13,7 @@ function keydown(target, key, repeat = false) {
 test('arrow keys emit direction commands and prevent browser scrolling', () => {
   const target = new EventTarget();
   const commands = [];
-  bindInput(target, direction => commands.push(direction));
+  bindInput(target, input => commands.push(input));
 
   // Opposite commands are forwarded too; the core decides which turns are legal.
   for (const key of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) {
@@ -25,21 +25,31 @@ test('arrow keys emit direction commands and prevent browser scrolling', () => {
 test('unrelated keys are untouched', () => {
   const target = new EventTarget();
   const commands = [];
-  bindInput(target, direction => commands.push(direction));
+  bindInput(target, input => commands.push(input));
 
-  for (const key of ['Enter', 'a', ' ', 'constructor']) {
+  for (const key of ['a', ' ', 'Shift', 'constructor']) {
     assert.equal(keydown(target, key).defaultPrevented, false);
   }
   assert.deepEqual(commands, []);
 });
 
+test('enter emits an enter command', () => {
+  const target = new EventTarget();
+  const commands = [];
+  bindInput(target, input => commands.push(input));
+
+  assert.equal(keydown(target, 'Enter').defaultPrevented, true);
+  assert.deepEqual(commands, ['enter']);
+});
+
 test('held arrow keys do not emit repeat commands', () => {
   const target = new EventTarget();
   const commands = [];
-  bindInput(target, direction => commands.push(direction));
+  bindInput(target, input => commands.push(input));
 
   for (const key of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) {
     assert.equal(keydown(target, key, true).defaultPrevented, true);
   }
+  assert.equal(keydown(target, 'Enter', true).defaultPrevented, true);
   assert.deepEqual(commands, []);
 });

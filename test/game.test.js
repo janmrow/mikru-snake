@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, step, score, isOpposite } from '../src/game.js';
+import { createGame, step, score, isOpposite, routeInput } from '../src/game.js';
 
 function game(overrides = {}) {
   return {
@@ -26,6 +26,8 @@ test('initial games are deterministic and place food on free cells', () => {
   assert.deepEqual(initial, createGame(() => 0.5));
   assert.equal(initial.width, 20);
   assert.equal(initial.height, 20);
+  assert.deepEqual(initial.snake, [{ x: 10, y: 10 }]);
+  assert.equal(initial.direction, 'right');
 
   const cellCount = initial.width * initial.height;
   for (let sample = 0; sample < cellCount; sample += 1) {
@@ -37,6 +39,8 @@ test('initial games are deterministic and place food on free cells', () => {
 
 test('score is zero at the start and grows by one when food is eaten', () => {
   let state = createGame(() => 0.5);
+  assert.equal(score(state), 0);
+  state = step(state, 'right', () => 0.5);
   assert.equal(score(state), 0);
   state = step(state, 'right', () => 0.5);
   assert.equal(score(state), 0);
@@ -59,31 +63,31 @@ test('movement advances the head and tail without randomness or mutation', () =>
 
 test('perpendicular turns move one cell in the requested direction', () => {
   const cases = [
-    ['right', 'up', { x: 2, y: 0 }],
-    ['right', 'down', { x: 2, y: 2 }],
-    ['up', 'left', { x: 1, y: 1 }],
-    ['up', 'right', { x: 3, y: 1 }],
+    ['right', 'up', [{ x: 2, y: 1 }, { x: 1, y: 1 }, { x: 0, y: 1 }], [{ x: 2, y: 0 }, { x: 2, y: 1 }, { x: 1, y: 1 }]],
+    ['right', 'down', [{ x: 2, y: 1 }, { x: 1, y: 1 }, { x: 0, y: 1 }], [{ x: 2, y: 2 }, { x: 2, y: 1 }, { x: 1, y: 1 }]],
+    ['up', 'left', [{ x: 2, y: 1 }, { x: 2, y: 2 }, { x: 2, y: 3 }], [{ x: 1, y: 1 }, { x: 2, y: 1 }, { x: 2, y: 2 }]],
+    ['up', 'right', [{ x: 2, y: 1 }, { x: 2, y: 2 }, { x: 2, y: 3 }], [{ x: 3, y: 1 }, { x: 2, y: 1 }, { x: 2, y: 2 }]],
   ];
-  for (const [direction, input, head] of cases) {
-    const next = step(game({ direction, snake: [{ x: 2, y: 1 }] }), input);
+  for (const [direction, input, snake, expected] of cases) {
+    const next = step(game({ direction, snake }), input);
     assert.equal(next.direction, input);
-    assert.deepEqual(next.snake, [head]);
+    assert.deepEqual(next.snake, expected);
     assert.equal(next.status, 'playing');
   }
 });
 
 test('immediate reversals keep the snake moving forward in all four directions', () => {
   const cases = [
-    ['right', 'left', [{ x: 2, y: 1 }, { x: 1, y: 1 }], { x: 3, y: 1 }],
-    ['left', 'right', [{ x: 1, y: 1 }, { x: 2, y: 1 }], { x: 0, y: 1 }],
-    ['up', 'down', [{ x: 1, y: 1 }, { x: 1, y: 2 }], { x: 1, y: 0 }],
-    ['down', 'up', [{ x: 1, y: 2 }, { x: 1, y: 1 }], { x: 1, y: 3 }],
+    ['right', 'left', [{ x: 2, y: 1 }, { x: 1, y: 1 }, { x: 0, y: 1 }], { x: 3, y: 1 }],
+    ['left', 'right', [{ x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }], { x: 0, y: 1 }],
+    ['up', 'down', [{ x: 1, y: 1 }, { x: 1, y: 2 }, { x: 1, y: 3 }], { x: 1, y: 0 }],
+    ['down', 'up', [{ x: 1, y: 2 }, { x: 1, y: 1 }, { x: 1, y: 0 }], { x: 1, y: 3 }],
   ];
   for (const [direction, input, snake, head] of cases) {
     const state = game({ direction, snake });
     assert.deepEqual(step(state, input), {
       ...state,
-      snake: [head, snake[0]],
+      snake: [head, snake[0], snake[1]],
     });
   }
 });
@@ -185,4 +189,72 @@ test('isOpposite detects only opposite pairs and never throws', () => {
   assert.equal(isOpposite(undefined, 'right'), false);
   assert.equal(isOpposite('left', undefined), false);
   assert.equal(isOpposite('left', 'bogus'), false);
+});
+
+test('a new game unfolds from the head in any requested start direction', () => {
+  const cases = [
+    ['up', [{ x: 10, y: 9 }, { x: 10, y: 10 }], [{ x: 10, y: 8 }, { x: 10, y: 9 }, { x: 10, y: 10 }]],
+    ['down', [{ x: 10, y: 11 }, { x: 10, y: 10 }], [{ x: 10, y: 12 }, { x: 10, y: 11 }, { x: 10, y: 10 }]],
+    ['left', [{ x: 9, y: 10 }, { x: 10, y: 10 }], [{ x: 8, y: 10 }, { x: 9, y: 10 }, { x: 10, y: 10 }]],
+    ['right', [{ x: 11, y: 10 }, { x: 10, y: 10 }], [{ x: 12, y: 10 }, { x: 11, y: 10 }, { x: 10, y: 10 }]],
+  ];
+  for (const [dir, afterFirst, afterSecond] of cases) {
+    const initial = createGame(() => 0.5, dir);
+    assert.equal(initial.direction, dir);
+    assert.deepEqual(initial.snake, [{ x: 10, y: 10 }]);
+    const first = step(initial, dir, () => 0.5);
+    assert.equal(first.status, 'playing');
+    assert.deepEqual(first.snake, afterFirst);
+    const second = step(first, dir, () => 0.5);
+    assert.equal(second.status, 'playing');
+    assert.deepEqual(second.snake, afterSecond);
+  }
+});
+
+test('a newborn snake grows without food, then vacates its tail', () => {
+  const initial = createGame(() => 0.5, 'right');
+  const grown = step(step(initial, 'right', () => 0.5), 'right', () => 0.5);
+  assert.equal(grown.snake.length, 3);
+  const moved = step(grown, 'right', () => 0.5);
+  assert.equal(moved.snake.length, 3);
+  assert.deepEqual(moved.snake[0], { x: 13, y: 10 });
+  assert.deepEqual(moved.snake[2], { x: 11, y: 10 });
+});
+
+test('a default new game is a centered dot with free food and zero score', () => {
+  const preview = createGame(() => 0.5);
+  assert.deepEqual(preview, createGame(() => 0.5));
+  assert.deepEqual(preview.snake, [{ x: 10, y: 10 }]);
+  assert.equal(preview.status, 'playing');
+  assert.equal(score(preview), 0);
+  assertFoodIsFree(preview);
+});
+
+test('a new game reuses free food instead of respawning', () => {
+  let rngCalls = 0;
+  const rng = () => { rngCalls += 1; return 0.5; };
+  const preview = createGame(() => 0.5);
+  const initial = createGame(rng, 'right', preview.food);
+  assert.deepEqual(initial.food, preview.food);
+  assert.equal(rngCalls, 0);
+
+  const blocked = createGame(() => 0.5, 'right', { x: 10, y: 10 });
+  assertFoodIsFree(blocked);
+});
+
+test('routeInput maps keys to steer, start, arm or ignore', () => {
+  const cases = [
+    ['running arrow steers', { running: true, status: 'playing', pending: undefined, current: 'right', input: 'up' }, 'steer'],
+    ['running second press waits', { running: true, status: 'playing', pending: 'up', current: 'right', input: 'left' }, 'ignore'],
+    ['running reversal waits', { running: true, status: 'playing', pending: undefined, current: 'right', input: 'left' }, 'ignore'],
+    ['running enter waits', { running: true, status: 'playing', pending: undefined, current: 'right', input: 'enter' }, 'ignore'],
+    ['ended arrow waits', { running: false, status: 'lost', pending: undefined, current: 'right', input: 'up' }, 'ignore'],
+    ['ended enter arms', { running: false, status: 'lost', pending: undefined, current: 'right', input: 'enter' }, 'arm'],
+    ['ready arrow starts', { running: false, status: 'playing', pending: undefined, current: 'right', input: 'left' }, 'start'],
+    ['ready enter waits', { running: false, status: 'playing', pending: undefined, current: 'right', input: 'enter' }, 'ignore'],
+    ['unknown input waits', { running: false, status: 'playing', pending: undefined, current: 'right', input: 'bogus' }, 'ignore'],
+  ];
+  for (const [name, args, expected] of cases) {
+    assert.equal(routeInput(args), expected, name);
+  }
 });

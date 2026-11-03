@@ -15,9 +15,9 @@ Steer, eat to grow, avoid walls and yourself.
 
 ```text
 index.html     board, score, hint
-src/game.js    rules and score, no browser APIs
+src/game.js    rules, board setup, pure input routing, no browser APIs
 src/render.js  draws state on canvas
-src/input.js   arrow keys to directions
+src/input.js   keys to inputs (arrows + Enter)
 src/main.js    wires input, core, and loop
 ```
 

@@ -1,17 +1,18 @@
-const directions = new Map([
+const inputs = new Map([
   ['ArrowUp', 'up'],
   ['ArrowDown', 'down'],
   ['ArrowLeft', 'left'],
   ['ArrowRight', 'right'],
+  ['Enter', 'enter'],
 ]);
 
-export function bindInput(target, onDirection) {
+export function bindInput(target, onInput) {
   target.addEventListener('keydown', event => {
-    const direction = directions.get(event.key);
-    if (direction === undefined) return;
+    const input = inputs.get(event.key);
+    if (input === undefined) return;
 
     event.preventDefault();
     if (event.repeat) return;
-    onDirection(direction);
+    onInput(input);
   });
 }

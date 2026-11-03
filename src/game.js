@@ -32,22 +32,38 @@ function spawnFood(width, height, snake, rng) {
     : freeCells[Math.floor(rng() * freeCells.length)];
 }
 
-export function createGame(rng) {
+export function createGame(rng, dir = 'right', food) {
   const width = 20;
   const height = 20;
-  const snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
+  const resolved = directions[dir] ? dir : 'right';
+  const snake = [{ x: 10, y: 10 }];
+  const kept = food && Number.isInteger(food.x) && Number.isInteger(food.y)
+    && !snake.some(segment => sameCell(segment, food))
+    ? { x: food.x, y: food.y }
+    : null;
   return {
     width,
     height,
     snake,
-    direction: 'right',
-    food: spawnFood(width, height, snake, rng),
+    direction: resolved,
+    food: kept ?? spawnFood(width, height, snake, rng),
     status: 'playing',
   };
 }
 
 export function score(state) {
-  return state.snake.length - initialSnakeLength;
+  return Math.max(0, state.snake.length - initialSnakeLength);
+}
+
+export function routeInput({ running, status, pending, current, input }) {
+  if (input !== 'enter' && !directions[input]) return 'ignore';
+  if (running) {
+    if (input === 'enter') return 'ignore';
+    if (pending !== undefined || isOpposite(input, current)) return 'ignore';
+    return 'steer';
+  }
+  if (status !== 'playing') return input === 'enter' ? 'arm' : 'ignore';
+  return input === 'enter' ? 'ignore' : 'start';
 }
 
 export function step(state, input, rng) {
@@ -65,8 +81,10 @@ export function step(state, input, rng) {
     y: state.snake[0].y + movement.y,
   };
   const grows = state.food !== null && sameCell(head, state.food);
-  // The tail vacates its cell on moves without growth.
-  const body = grows ? state.snake : state.snake.slice(0, -1);
+  // The tail vacates its cell, unless the snake grows by eating
+  // or is still a newborn below full length.
+  const newborn = state.snake.length < initialSnakeLength;
+  const body = grows || newborn ? state.snake : state.snake.slice(0, -1);
   if (
     head.x < 0 || head.x >= state.width ||
     head.y < 0 || head.y >= state.height ||
