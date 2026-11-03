@@ -39,4 +39,4 @@ Push/merge to `main` runs `verify`, then deploys `index.html` and `src/` to prod
 
 ## Direction
 
-See `ROADMAP.md` for scope and next steps.
+See [ROADMAP.md](./ROADMAP.md) for scope and next steps.
