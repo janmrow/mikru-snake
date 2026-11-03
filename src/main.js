@@ -1,4 +1,4 @@
-import { createGame, step, score } from './game.js';
+import { createGame, step, score, isOpposite } from './game.js';
 import { bindInput } from './input.js';
 import { render } from './render.js';
 
@@ -43,7 +43,9 @@ function start(input) {
 
 bindInput(window, input => {
   if (timer) {
-    direction = input;
+    if (direction === undefined && !isOpposite(input, state.direction)) {
+      direction = input;
+    }
   } else {
     start(input);
   }

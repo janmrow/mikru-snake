@@ -11,6 +11,7 @@ export function bindInput(target, onDirection) {
     if (direction === undefined) return;
 
     event.preventDefault();
+    if (event.repeat) return;
     onDirection(direction);
   });
 }
