@@ -23,7 +23,7 @@ src/main.js    wires input, core, and loop
 
 ## Run
 
-Serve this directory over HTTP and open `index.html`.
+Serve this directory over HTTP (e.g. `python3 -m http.server`) and open `index.html`.
 `npm run verify` checks syntax and runs tests. No install, no build.
 
 ## Deploy
@@ -39,4 +39,4 @@ Push/merge to `main` runs `verify`, then deploys `index.html` and `src/` to prod
 
 ## Direction
 
-See `ROADMAP.md` for scope and next steps.
+See [ROADMAP.md](./ROADMAP.md) for scope and next steps.
