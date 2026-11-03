@@ -8,6 +8,7 @@ Build MikruSnake as a small, understandable browser game.
 
 - Prefer the smallest coherent change.
 - Preserve the separation between game logic and browser/UI code.
+- `src/game.js` must not touch DOM, clock, timers, or RNG directly (RNG only as injected parameter); browser APIs live in `src/render.js`, `src/input.js`, `src/main.js`.
 - Use vanilla JavaScript and native APIs by default.
 - Do not add dependencies, frameworks, build tools, or abstractions without a clear benefit.
 - Keep behavior deterministic where practical.
