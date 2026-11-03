@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bindInput } from '../src/input.js';
 
-function keydown(target, key) {
+function keydown(target, key, repeat = false) {
   const event = new Event('keydown', { cancelable: true });
   event.key = key;
+  event.repeat = repeat;
   target.dispatchEvent(event);
   return event;
 }
@@ -28,6 +29,17 @@ test('unrelated keys are untouched', () => {
 
   for (const key of ['Enter', 'a', ' ', 'constructor']) {
     assert.equal(keydown(target, key).defaultPrevented, false);
+  }
+  assert.deepEqual(commands, []);
+});
+
+test('held arrow keys do not emit repeat commands', () => {
+  const target = new EventTarget();
+  const commands = [];
+  bindInput(target, direction => commands.push(direction));
+
+  for (const key of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) {
+    assert.equal(keydown(target, key, true).defaultPrevented, true);
   }
   assert.deepEqual(commands, []);
 });
