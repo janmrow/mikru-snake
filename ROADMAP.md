@@ -32,5 +32,5 @@ Each item must earn its place.
 
 Deliberately out, to stay small:
 
-- in-game replay UI — seed + inputs in an issue reproduce a bug until proven insufficient.
-- model benchmarks / AI experiments as product features — experiments live in branches and PRs, not shipped in runtime `src/`.
+- in-game replay UI — steps + inputs in an issue reproduce a bug until proven insufficient.
+- AI benchmarks / agent experiments as product features — experiments live in branches and PRs, not shipped in runtime `src/`.
