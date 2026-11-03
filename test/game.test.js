@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, step, score } from '../src/game.js';
+import { createGame, step, score, isOpposite } from '../src/game.js';
 
 function game(overrides = {}) {
   return {
@@ -172,4 +172,17 @@ test('lost and won games stay unchanged', () => {
     const state = game({ status });
     assert.deepEqual(step(state, 'up'), state);
   }
+});
+
+test('isOpposite detects only opposite pairs and never throws', () => {
+  assert.equal(isOpposite('left', 'right'), true);
+  assert.equal(isOpposite('right', 'left'), true);
+  assert.equal(isOpposite('up', 'down'), true);
+  assert.equal(isOpposite('down', 'up'), true);
+  assert.equal(isOpposite('right', 'right'), false);
+  assert.equal(isOpposite('right', 'up'), false);
+  assert.equal(isOpposite('up', 'right'), false);
+  assert.equal(isOpposite(undefined, 'right'), false);
+  assert.equal(isOpposite('left', undefined), false);
+  assert.equal(isOpposite('left', 'bogus'), false);
 });

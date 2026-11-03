@@ -9,6 +9,12 @@ function sameCell(a, b) {
   return a.x === b.x && a.y === b.y;
 }
 
+export function isOpposite(a, b) {
+  const first = directions[a];
+  const second = directions[b];
+  return Boolean(first && second && first.x === -second.x && first.y === -second.y);
+}
+
 const initialSnakeLength = 3;
 
 function spawnFood(width, height, snake, rng) {
@@ -48,9 +54,8 @@ export function step(state, input, rng) {
   if (state.status !== 'playing') return state;
 
   let direction = state.direction;
-  const current = directions[direction];
   const requested = directions[input];
-  if (requested && !(requested.x === -current.x && requested.y === -current.y)) {
+  if (requested && !isOpposite(input, direction)) {
     direction = input;
   }
 
