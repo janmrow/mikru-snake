@@ -32,10 +32,30 @@ function spawnFood(width, height, snake, rng) {
     : freeCells[Math.floor(rng() * freeCells.length)];
 }
 
-export function createGame(rng) {
+export function createGame(rng, dir = 'right', food) {
   const width = 20;
   const height = 20;
-  const snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
+  const resolved = directions[dir] ? dir : 'right';
+  const vec = directions[resolved];
+  const snake = [0, 1, 2].map(i => ({ x: 10 - vec.x * i, y: 10 - vec.y * i }));
+  const kept = food && Number.isInteger(food.x) && Number.isInteger(food.y)
+    && !snake.some(segment => sameCell(segment, food))
+    ? { x: food.x, y: food.y }
+    : null;
+  return {
+    width,
+    height,
+    snake,
+    direction: resolved,
+    food: kept ?? spawnFood(width, height, snake, rng),
+    status: 'playing',
+  };
+}
+
+export function createPreview(rng) {
+  const width = 20;
+  const height = 20;
+  const snake = [{ x: 10, y: 10 }];
   return {
     width,
     height,
@@ -47,7 +67,7 @@ export function createGame(rng) {
 }
 
 export function score(state) {
-  return state.snake.length - initialSnakeLength;
+  return Math.max(0, state.snake.length - initialSnakeLength);
 }
 
 export function step(state, input, rng) {

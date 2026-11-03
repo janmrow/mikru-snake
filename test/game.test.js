@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, step, score, isOpposite } from '../src/game.js';
+import { createGame, createPreview, step, score, isOpposite } from '../src/game.js';
 
 function game(overrides = {}) {
   return {
@@ -26,6 +26,8 @@ test('initial games are deterministic and place food on free cells', () => {
   assert.deepEqual(initial, createGame(() => 0.5));
   assert.equal(initial.width, 20);
   assert.equal(initial.height, 20);
+  assert.deepEqual(initial.snake, [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }]);
+  assert.equal(initial.direction, 'right');
 
   const cellCount = initial.width * initial.height;
   for (let sample = 0; sample < cellCount; sample += 1) {
@@ -185,4 +187,43 @@ test('isOpposite detects only opposite pairs and never throws', () => {
   assert.equal(isOpposite(undefined, 'right'), false);
   assert.equal(isOpposite('left', undefined), false);
   assert.equal(isOpposite('left', 'bogus'), false);
+});
+
+test('a new game moves one cell in any requested start direction', () => {
+  const cases = [
+    ['up', [{ x: 10, y: 10 }, { x: 10, y: 11 }, { x: 10, y: 12 }], { x: 10, y: 9 }],
+    ['down', [{ x: 10, y: 10 }, { x: 10, y: 9 }, { x: 10, y: 8 }], { x: 10, y: 11 }],
+    ['left', [{ x: 10, y: 10 }, { x: 11, y: 10 }, { x: 12, y: 10 }], { x: 9, y: 10 }],
+    ['right', [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }], { x: 11, y: 10 }],
+  ];
+  for (const [dir, snake, head] of cases) {
+    const initial = createGame(() => 0.5, dir);
+    assert.equal(initial.direction, dir);
+    assert.deepEqual(initial.snake, snake);
+    const next = step(initial, dir, () => 0.5);
+    assert.equal(next.status, 'playing');
+    assert.deepEqual(next.snake[0], head);
+    assert.equal(next.snake.length, 3);
+  }
+});
+
+test('preview is a centered dot with free food and zero score', () => {
+  const preview = createPreview(() => 0.5);
+  assert.deepEqual(preview, createPreview(() => 0.5));
+  assert.deepEqual(preview.snake, [{ x: 10, y: 10 }]);
+  assert.equal(preview.status, 'playing');
+  assert.equal(score(preview), 0);
+  assertFoodIsFree(preview);
+});
+
+test('a new game reuses free food instead of respawning', () => {
+  let rngCalls = 0;
+  const rng = () => { rngCalls += 1; return 0.5; };
+  const preview = createPreview(() => 0.5);
+  const initial = createGame(rng, 'right', preview.food);
+  assert.deepEqual(initial.food, preview.food);
+  assert.equal(rngCalls, 0);
+
+  const blocked = createGame(() => 0.5, 'right', { x: 10, y: 10 });
+  assertFoodIsFree(blocked);
 });
