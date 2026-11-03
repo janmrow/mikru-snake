@@ -36,8 +36,7 @@ export function createGame(rng, dir = 'right', food) {
   const width = 20;
   const height = 20;
   const resolved = directions[dir] ? dir : 'right';
-  const vec = directions[resolved];
-  const snake = [0, 1, 2].map(i => ({ x: 10 - vec.x * i, y: 10 - vec.y * i }));
+  const snake = [{ x: 10, y: 10 }];
   const kept = food && Number.isInteger(food.x) && Number.isInteger(food.y)
     && !snake.some(segment => sameCell(segment, food))
     ? { x: food.x, y: food.y }
@@ -48,20 +47,6 @@ export function createGame(rng, dir = 'right', food) {
     snake,
     direction: resolved,
     food: kept ?? spawnFood(width, height, snake, rng),
-    status: 'playing',
-  };
-}
-
-export function createPreview(rng) {
-  const width = 20;
-  const height = 20;
-  const snake = [{ x: 10, y: 10 }];
-  return {
-    width,
-    height,
-    snake,
-    direction: 'right',
-    food: spawnFood(width, height, snake, rng),
     status: 'playing',
   };
 }
@@ -85,8 +70,10 @@ export function step(state, input, rng) {
     y: state.snake[0].y + movement.y,
   };
   const grows = state.food !== null && sameCell(head, state.food);
-  // The tail vacates its cell on moves without growth.
-  const body = grows ? state.snake : state.snake.slice(0, -1);
+  // The tail vacates its cell, unless the snake grows by eating
+  // or is still a newborn below full length.
+  const newborn = state.snake.length < initialSnakeLength;
+  const body = grows || newborn ? state.snake : state.snake.slice(0, -1);
   if (
     head.x < 0 || head.x >= state.width ||
     head.y < 0 || head.y >= state.height ||

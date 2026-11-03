@@ -1,17 +1,17 @@
-import { createGame, createPreview, step, score, isOpposite } from './game.js';
+import { createGame, step, score, isOpposite } from './game.js';
 import { bindInput } from './input.js';
 import { render } from './render.js';
 
 const board = document.querySelector('#board');
 const scoreboard = document.querySelector('#score');
 const hint = document.querySelector('#hint');
-let state = createPreview(Math.random);
+let state = createGame(Math.random);
 let direction;
 let timer;
 
 function hintText() {
-  if (state.status === 'lost') return 'Game over · Enter for new board';
-  if (state.status === 'won') return 'You win · Enter for new board';
+  if (state.status === 'lost') return 'Game over · Enter for new game';
+  if (state.status === 'won') return 'You win · Enter for new game';
   if (timer) return 'Running...';
   return 'Ready · Arrow keys to start';
 }
@@ -43,7 +43,7 @@ function start(input) {
 function arm() {
   clearInterval(timer);
   timer = undefined;
-  state = createPreview(Math.random);
+  state = createGame(Math.random);
   direction = undefined;
   draw();
 }
