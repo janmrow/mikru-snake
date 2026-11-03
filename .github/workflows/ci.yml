@@ -36,4 +36,11 @@ jobs:
           printf '%s\n' "${{ vars.MIKRUS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
       - run: |
+          git fetch origin main
+          head_sha=$(git rev-parse HEAD)
+          main_sha=$(git rev-parse origin/main)
+          if [ "$head_sha" != "$main_sha" ]; then
+            echo "Stale commit ${{ github.sha }} is behind origin/main; skipping deploy."
+            exit 0
+          fi
           rsync -az --delete -e "ssh -p ${{ vars.MIKRUS_PORT }} -i ~/.ssh/mikrus_key -o StrictHostKeyChecking=yes" index.html src "${{ vars.MIKRUS_USER }}@${{ vars.MIKRUS_HOST }}:${{ vars.MIKRUS_PATH }}"
