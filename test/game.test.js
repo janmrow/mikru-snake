@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, step, score, isOpposite } from '../src/game.js';
+import { createGame, step, score, isOpposite, routeInput } from '../src/game.js';
 
 function game(overrides = {}) {
   return {
@@ -240,4 +240,21 @@ test('a new game reuses free food instead of respawning', () => {
 
   const blocked = createGame(() => 0.5, 'right', { x: 10, y: 10 });
   assertFoodIsFree(blocked);
+});
+
+test('routeInput maps keys to steer, start, arm or ignore', () => {
+  const cases = [
+    ['running arrow steers', { running: true, status: 'playing', pending: undefined, current: 'right', input: 'up' }, 'steer'],
+    ['running second press waits', { running: true, status: 'playing', pending: 'up', current: 'right', input: 'left' }, 'ignore'],
+    ['running reversal waits', { running: true, status: 'playing', pending: undefined, current: 'right', input: 'left' }, 'ignore'],
+    ['running enter waits', { running: true, status: 'playing', pending: undefined, current: 'right', input: 'enter' }, 'ignore'],
+    ['ended arrow waits', { running: false, status: 'lost', pending: undefined, current: 'right', input: 'up' }, 'ignore'],
+    ['ended enter arms', { running: false, status: 'lost', pending: undefined, current: 'right', input: 'enter' }, 'arm'],
+    ['ready arrow starts', { running: false, status: 'playing', pending: undefined, current: 'right', input: 'left' }, 'start'],
+    ['ready enter waits', { running: false, status: 'playing', pending: undefined, current: 'right', input: 'enter' }, 'ignore'],
+    ['unknown input waits', { running: false, status: 'playing', pending: undefined, current: 'right', input: 'bogus' }, 'ignore'],
+  ];
+  for (const [name, args, expected] of cases) {
+    assert.equal(routeInput(args), expected, name);
+  }
 });

@@ -1,4 +1,4 @@
-import { createGame, step, score, isOpposite } from './game.js';
+import { createGame, step, score, routeInput } from './game.js';
 import { bindInput } from './input.js';
 import { render } from './render.js';
 
@@ -49,16 +49,10 @@ function arm() {
 }
 
 bindInput(window, input => {
-  if (timer) {
-    if (input === 'enter') return;
-    if (direction === undefined && !isOpposite(input, state.direction)) {
-      direction = input;
-    }
-  } else if (state.status !== 'playing') {
-    if (input === 'enter') arm();
-  } else if (input !== 'enter') {
-    start(input);
-  }
+  const action = routeInput({ running: Boolean(timer), status: state.status, pending: direction, current: state.direction, input });
+  if (action === 'steer') direction = input;
+  else if (action === 'start') start(input);
+  else if (action === 'arm') arm();
 });
 
 draw();

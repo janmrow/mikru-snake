@@ -55,6 +55,17 @@ export function score(state) {
   return Math.max(0, state.snake.length - initialSnakeLength);
 }
 
+export function routeInput({ running, status, pending, current, input }) {
+  if (input !== 'enter' && !directions[input]) return 'ignore';
+  if (running) {
+    if (input === 'enter') return 'ignore';
+    if (pending !== undefined || isOpposite(input, current)) return 'ignore';
+    return 'steer';
+  }
+  if (status !== 'playing') return input === 'enter' ? 'arm' : 'ignore';
+  return input === 'enter' ? 'ignore' : 'start';
+}
+
 export function step(state, input, rng) {
   if (state.status !== 'playing') return state;
 
