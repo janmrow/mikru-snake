@@ -27,3 +27,10 @@ Candidates, not commitments:
 - local high score
 
 Each item must earn its place.
+
+## Not doing
+
+Deliberately out, to stay small:
+
+- in-game replay UI — seed + inputs in an issue reproduce a bug until proven insufficient.
+- model benchmarks / AI experiments as product features — experiments live in branches and PRs, not shipped in runtime `src/`.
