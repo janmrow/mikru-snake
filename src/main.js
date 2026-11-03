@@ -1,17 +1,17 @@
-import { createGame, step, score, isOpposite } from './game.js';
+import { createGame, createPreview, step, score, isOpposite } from './game.js';
 import { bindInput } from './input.js';
 import { render } from './render.js';
 
 const board = document.querySelector('#board');
 const scoreboard = document.querySelector('#score');
 const hint = document.querySelector('#hint');
-let state = createGame(Math.random);
+let state = createPreview(Math.random);
 let direction;
 let timer;
 
 function hintText() {
-  if (state.status === 'lost') return 'Game over · Arrow key to restart';
-  if (state.status === 'won') return 'You win · Arrow key to restart';
+  if (state.status === 'lost') return 'Game over · Enter for new board';
+  if (state.status === 'won') return 'You win · Enter for new board';
   if (timer) return 'Running...';
   return 'Ready · Arrow keys to start';
 }
@@ -33,20 +33,30 @@ function tick() {
 }
 
 function start(input) {
-  if (state.status !== 'playing') {
-    state = createGame(Math.random);
-  }
+  clearInterval(timer);
+  state = createGame(Math.random, input, state.food);
   direction = input;
   timer = setInterval(tick, 150);
   draw();
 }
 
+function arm() {
+  clearInterval(timer);
+  timer = undefined;
+  state = createPreview(Math.random);
+  direction = undefined;
+  draw();
+}
+
 bindInput(window, input => {
   if (timer) {
+    if (input === 'enter') return;
     if (direction === undefined && !isOpposite(input, state.direction)) {
       direction = input;
     }
-  } else {
+  } else if (state.status !== 'playing') {
+    if (input === 'enter') arm();
+  } else if (input !== 'enter') {
     start(input);
   }
 });

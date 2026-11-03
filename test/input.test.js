@@ -27,10 +27,19 @@ test('unrelated keys are untouched', () => {
   const commands = [];
   bindInput(target, direction => commands.push(direction));
 
-  for (const key of ['Enter', 'a', ' ', 'constructor']) {
+  for (const key of ['a', ' ', 'Shift', 'constructor']) {
     assert.equal(keydown(target, key).defaultPrevented, false);
   }
   assert.deepEqual(commands, []);
+});
+
+test('enter emits an enter command', () => {
+  const target = new EventTarget();
+  const commands = [];
+  bindInput(target, direction => commands.push(direction));
+
+  assert.equal(keydown(target, 'Enter').defaultPrevented, true);
+  assert.deepEqual(commands, ['enter']);
 });
 
 test('held arrow keys do not emit repeat commands', () => {
@@ -41,5 +50,6 @@ test('held arrow keys do not emit repeat commands', () => {
   for (const key of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) {
     assert.equal(keydown(target, key, true).defaultPrevented, true);
   }
+  assert.equal(keydown(target, 'Enter', true).defaultPrevented, true);
   assert.deepEqual(commands, []);
 });
